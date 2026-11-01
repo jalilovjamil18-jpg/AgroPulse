@@ -8,6 +8,7 @@ import Link from 'next/link';
 import {Activity,BarChart3,BookOpenCheck,CheckCircle2,Download,Droplets,Landmark,LayoutDashboard,LockKeyhole,LogOut,MapPinned,RadioTower,RefreshCcw,Search,Shield,ShieldCheck,Sprout,Waves,Plus} from 'lucide-react';
 import {useLanguage} from '@/components/LanguageProvider';
 import CabinetPeriodAnalytics from '@/components/CabinetPeriodAnalytics';
+import QorakolFieldMap from '@/components/QorakolFieldMap';
 import {API_BASE,apiRequest,loadPilotData,type PilotData,type Reading,type Role,type Station,type User} from '@/lib/realApi';
 
 type View='overview'|'canals'|'readings'|'fields'|'balance'|'devices';
@@ -73,7 +74,7 @@ export default function RealPilotCabinet(){
  {view==='balance'&&(role==='authority'||role==='admin')&&<><PilotAnnualWaterBalance token={token}/><PilotWaterBalance token={token} refreshKey={refreshKey}/></> }
   {view==='devices'&&role!=='farmer'&&<PilotDeviceMonitoring token={token} role={role} refreshKey={refreshKey}/>}
   {view==='canals'&&<section className="ap-real-panel"><h2><Waves size={21}/>{L.canals}</h2>{!data.canals.length?<p className="ap-real-empty">{L.noData}</p>:<div className="ap-real-simple-grid">{data.canals.map(c=><article key={c.id}><Waves size={20}/><strong>{c.name}</strong><small>{c.code}</small></article>)}</div>}</section>}
-  {view==='fields'&&<section className="ap-real-panel"><h2><Sprout size={21}/>{L.fields}</h2>{!data.fields.length?<p className="ap-real-empty">{L.noData}</p>:<div className="ap-real-table-scroll"><table><thead><tr><th>{L.name}</th><th>{L.crop}</th><th>{L.size}</th></tr></thead><tbody>{data.fields.map(f=><tr key={f.id}><td>{f.name}</td><td>{f.crop||'—'}</td><td>{f.area_ha}</td></tr>)}</tbody></table></div>}</section>}
+  {view==='fields'&&<QorakolFieldMap fields={data.fields} lang={lang}/>}
   {view==='readings'&&<section className="ap-real-panel"><div className="ap-real-panel-head"><h2><BarChart3 size={20}/>{L.readings}</h2><div className="ap-real-actions"><button onClick={exportCsv} disabled={busy}><Download size={16}/>{L.reports}</button>{role==='irrigation'||role==='admin'?<button className="ap-real-primary" onClick={()=>setAdding(x=>!x)}><Plus size={16}/>{L.input}</button>:null}</div></div>
    {adding&&<form className="ap-real-entry" onSubmit={saveReading}><label>{L.station}<select required value={stationId} onChange={e=>setStationId(e.target.value)}><option value="">—</option>{data.stations.filter(s=>s.is_enabled).map(s=><option key={s.id} value={s.id}>{s.name} ({s.code})</option>)}</select></label><label>{L.time}<input required type="datetime-local" value={at} onChange={e=>setAt(e.target.value)}/></label><label>{L.flow}<input required min="0" step="0.001" type="number" value={flow} onChange={e=>setFlow(e.target.value)}/></label><label>{L.level}<input min="0" step="0.01" type="number" value={level} onChange={e=>setLevel(e.target.value)}/></label><button className="ap-real-primary" disabled={busy}>{L.save}</button><button type="button" onClick={()=>setAdding(false)}>{L.cancel}</button></form>}
    <label className="ap-real-search"><Search size={17}/><input placeholder={L.filter} value={query} onChange={e=>setQuery(e.target.value)}/></label><ReadingsTable list={filtered} L={L} lang={lang}/></section>}
