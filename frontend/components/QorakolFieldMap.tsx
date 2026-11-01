@@ -1,79 +1,113 @@
 'use client';
 
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {ExternalLink,Layers,MapPin,Maximize2,Satellite,Search,ShieldCheck,Sprout} from 'lucide-react';
+import {ExternalLink,Layers,MapPin,Maximize2,Search,ShieldCheck,Sprout,ZoomIn,ZoomOut} from 'lucide-react';
 
 type FieldItem={id:number;name:string;crop:string;area_ha:string;area_id:number|null;canal_id:number|null};
 type Lang='uz'|'ru'|'en';
-type YandexPlacemark={};
-type YandexMap={
-  geoObjects:{add:(object:YandexPlacemark)=>void};
-  destroy:()=>void;
-  setType:(type:string)=>void;
-  container:{fitToViewport:()=>void};
+type YMap3={
+ addChild:(child:unknown)=>YMap3;
+ setLocation:(location:{center?:[number,number];zoom?:number;duration?:number})=>void;
+ destroy:()=>void;
 };
-type YandexMapsApi={
-  ready:(callback:()=>void)=>void;
-  Map:new (element:HTMLElement,options:Record<string,unknown>)=>YandexMap;
-  Placemark:new (coordinates:number[],properties:Record<string,string>,options?:Record<string,unknown>)=>YandexPlacemark;
+type YMaps3={
+ ready:Promise<void>;
+ YMap:new (container:HTMLElement,options:Record<string,unknown>,children?:unknown[])=>YMap3;
+ YMapDefaultSchemeLayer:new (options?:Record<string,unknown>)=>unknown;
+ YMapDefaultFeaturesLayer:new (options?:Record<string,unknown>)=>unknown;
+ import:{
+  (packageName:string):Promise<{YMapDefaultMarker:new (options:Record<string,unknown>)=>unknown}>;
+  registerCdn?:(template:string,packageName:string)=>void;
+ };
 };
-declare global { interface Window { ymaps?:YandexMapsApi } }
+declare global {interface Window {ymaps3?:YMaps3}}
 
-const CENTER:[number,number]=[39.517043,63.840141];
+const CENTER:[number,number]=[63.840141,39.517043];
 
-function loadYandexMaps(key:string):Promise<YandexMapsApi>{
+function loadYandexMaps(key:string):Promise<YMaps3>{
  return new Promise((resolve,reject)=>{
-  const ready=()=>{if(!window.ymaps){reject(new Error('Yandex Maps API yuklanmadi.'));return;}window.ymaps.ready(()=>resolve(window.ymaps!));};
-  if(window.ymaps){ready();return;}
+  const finish=async()=>{
+   try{
+    const api=window.ymaps3;
+    if(!api)throw new Error('Yandex Maps API yuklanmadi.');
+    await api.ready;
+    resolve(api);
+   }catch(error){reject(error)}
+  };
+  if(window.ymaps3){void finish();return;}
   let script=document.querySelector<HTMLScriptElement>('script[data-agropulse-yandex]');
   if(script){
-   script.addEventListener('load',ready,{once:true});
+   script.addEventListener('load',()=>void finish(),{once:true});
    script.addEventListener('error',()=>reject(new Error('Yandex Maps serveriga ulanib bo‘lmadi.')),{once:true});
+   if(script.dataset.loaded==='true')void finish();
    return;
   }
   script=document.createElement('script');
   script.dataset.agropulseYandex='true';
-  script.src=`https://api-maps.yandex.ru/2.1/?apikey=${encodeURIComponent(key)}&lang=ru_RU`;
+  script.src=`https://api-maps.yandex.ru/v3/?apikey=${encodeURIComponent(key)}&lang=ru_RU`;
   script.async=true;
-  script.onload=ready;
-  script.onerror=()=>reject(new Error('Yandex Maps API kaliti yoki internet aloqasini tekshiring.'));
+  script.onload=()=>{script!.dataset.loaded='true';void finish()};
+  script.onerror=()=>reject(new Error('Yandex API kaliti yoki internet aloqasini tekshiring.'));
   document.head.appendChild(script);
  });
 }
 
 const words={
- uz:{title:'Qorako‘l tumani xaritasi',subtitle:'Sun’iy yo‘ldosh va sxematik xarita',total:'Jami maydonlar',hectares:'Umumiy maydon',fields:'Dalalar ro‘yxati',empty:'Hozircha dalalar kiritilmagan',missing:'Dalalar uchun koordinatalar hali kiritilmagan',hint:'Kadastr koordinatalari yoki GeoJSON/KML fayli yuklangach, yer uchastkalari chegaralari xaritada alohida ko‘rsatiladi.',center:'Qorako‘l tumani markazi',loading:'Xarita yuklanmoqda…',noKey:'Yandex API kaliti ulanmagan. frontend/.env.local fayliga NEXT_PUBLIC_YANDEX_MAPS_API_KEY ni kiriting va frontendni qayta ishga tushiring.',failed:'Xarita yuklanmadi. API kaliti faolligini va 127.0.0.1 uchun HTTP Referer cheklovini tekshiring.',satellite:'Sputnik',map:'Xarita',hybrid:'Gibrid',fullscreen:'To‘liq ekran',search:'Dala nomi bo‘yicha qidirish…',noMatch:'Mos dala topilmadi',open:'Yandex Maps’da ochish',real:'Haqiqiy ma’lumotlar'},
- ru:{title:'Карта Каракульского района',subtitle:'Спутник и схема',total:'Всего участков',hectares:'Общая площадь',fields:'Список полей',empty:'Поля пока не добавлены',missing:'Координаты полей пока не внесены',hint:'После загрузки кадастровых координат или файла GeoJSON/KML границы участков будут показаны на карте.',center:'Центр Каракульского района',loading:'Загрузка карты…',noKey:'Ключ Yandex API не подключён. Добавьте NEXT_PUBLIC_YANDEX_MAPS_API_KEY в frontend/.env.local и перезапустите frontend.',failed:'Не удалось загрузить карту. Проверьте активацию ключа и HTTP Referer для 127.0.0.1.',satellite:'Спутник',map:'Карта',hybrid:'Гибрид',fullscreen:'На весь экран',search:'Поиск поля…',noMatch:'Поле не найдено',open:'Открыть в Яндекс Картах',real:'Реальные данные'},
- en:{title:'Qorako‘l district map',subtitle:'Satellite and schematic map',total:'Total fields',hectares:'Total area',fields:'Field register',empty:'No fields have been added yet',missing:'Field coordinates have not been added yet',hint:'Once cadastral coordinates or a GeoJSON/KML file are provided, parcel boundaries can be shown individually on the map.',center:'Qorako‘l district centre',loading:'Loading map…',noKey:'Yandex API key is not configured. Add NEXT_PUBLIC_YANDEX_MAPS_API_KEY to frontend/.env.local and restart the frontend.',failed:'Map failed to load. Check key activation and HTTP Referer restrictions for 127.0.0.1.',satellite:'Satellite',map:'Map',hybrid:'Hybrid',fullscreen:'Fullscreen',search:'Search fields…',noMatch:'No matching field',open:'Open in Yandex Maps',real:'Live data'}
+ uz:{title:'Qorako‘l tumani xaritasi',subtitle:'Interaktiv xarita va yer maydonlari reyestri',total:'Jami maydonlar',hectares:'Umumiy maydon',fields:'Dalalar ro‘yxati',empty:'Hozircha dalalar kiritilmagan',missing:'Koordinatalar kiritilmagan',hint:'Kadastr koordinatalari yoki GeoJSON/KML fayli yuklangach, yer uchastkalari chegaralari xaritada alohida ko‘rsatiladi.',center:'Qorako‘l tumani markazi',loading:'Xarita yuklanmoqda…',noKey:'Yandex API kaliti ulanmagan. frontend/.env.local fayliga NEXT_PUBLIC_YANDEX_MAPS_API_KEY ni kiriting va frontendni qayta ishga tushiring.',failed:'Xarita yuklanmadi. API kaliti faolligini va HTTP Referer cheklovini tekshiring.',map:'Xarita',satellite:'Sputnikni ochish',fullscreen:'To‘liq ekran',search:'Dala nomi bo‘yicha qidirish…',noMatch:'Mos dala topilmadi',open:'Yandex Maps’da ochish',real:'Haqiqiy ma’lumotlar',zoomIn:'Kattalashtirish',zoomOut:'Kichraytirish'},
+ ru:{title:'Карта Каракульского района',subtitle:'Интерактивная карта и реестр полей',total:'Всего участков',hectares:'Общая площадь',fields:'Список полей',empty:'Поля пока не добавлены',missing:'Координаты не внесены',hint:'После загрузки кадастровых координат или файла GeoJSON/KML границы участков будут показаны на карте.',center:'Центр Каракульского района',loading:'Загрузка карты…',noKey:'Ключ Yandex API не подключён. Добавьте NEXT_PUBLIC_YANDEX_MAPS_API_KEY в frontend/.env.local и перезапустите frontend.',failed:'Не удалось загрузить карту. Проверьте активацию ключа и ограничение HTTP Referer.',map:'Карта',satellite:'Открыть спутник',fullscreen:'На весь экран',search:'Поиск поля…',noMatch:'Поле не найдено',open:'Открыть в Яндекс Картах',real:'Реальные данные',zoomIn:'Увеличить',zoomOut:'Уменьшить'},
+ en:{title:'Qorako‘l district map',subtitle:'Interactive map and field register',total:'Total fields',hectares:'Total area',fields:'Field register',empty:'No fields have been added yet',missing:'Coordinates have not been added',hint:'Once cadastral coordinates or a GeoJSON/KML file are provided, parcel boundaries can be shown individually on the map.',center:'Qorako‘l district centre',loading:'Loading map…',noKey:'Yandex API key is not configured. Add NEXT_PUBLIC_YANDEX_MAPS_API_KEY to frontend/.env.local and restart the frontend.',failed:'Map failed to load. Check key activation and HTTP Referer restrictions.',map:'Map',satellite:'Open satellite',fullscreen:'Fullscreen',search:'Search fields…',noMatch:'No matching field',open:'Open in Yandex Maps',real:'Live data',zoomIn:'Zoom in',zoomOut:'Zoom out'}
 };
 
 export default function QorakolFieldMap({fields,lang}:{fields:FieldItem[];lang:Lang}){
- const t=words[lang];const mapNode=useRef<HTMLDivElement|null>(null);const mapRef=useRef<YandexMap|null>(null);
+ const t=words[lang];const mapNode=useRef<HTMLDivElement|null>(null);const mapRef=useRef<YMap3|null>(null);
+ const zoomRef=useRef(12);
  const [status,setStatus]=useState<'loading'|'ready'|'error'|'missing'>('loading');
- const [error,setError]=useState('');const [layer,setLayer]=useState<'hybrid'|'satellite'|'map'>('hybrid');const [query,setQuery]=useState('');
+ const [error,setError]=useState('');const [query,setQuery]=useState('');
  const totalArea=useMemo(()=>fields.reduce((sum,item)=>sum+Number(item.area_ha||0),0),[fields]);
  const filtered=useMemo(()=>fields.filter(field=>(field.name+' '+field.crop).toLowerCase().includes(query.toLowerCase())),[fields,query]);
 
  useEffect(()=>{
   const key=process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
   if(!key){setStatus('missing');return;}
-  let cancelled=false;let instance:YandexMap|null=null;
-  loadYandexMaps(key).then(api=>{
+  let cancelled=false;let instance:YMap3|null=null;
+  loadYandexMaps(key).then(async api=>{
    if(cancelled||!mapNode.current)return;
-   instance=new api.Map(mapNode.current,{
-    center:CENTER,zoom:12,type:'yandex#hybrid',
-    controls:['zoomControl','typeSelector','fullscreenControl','geolocationControl'],
-    suppressMapOpenBlock:true
-   });
-   const marker=new api.Placemark(CENTER,{hintContent:t.center,balloonContent:`<strong>Qorako‘l tumani</strong><br/>Buxoro viloyati`},{preset:'islands#greenDotIconWithCaption'});
-   instance.geoObjects.add(marker);mapRef.current=instance;setStatus('ready');
-   window.setTimeout(()=>instance?.container.fitToViewport(),150);
+   api.import.registerCdn?.('https://cdn.jsdelivr.net/npm/{package}','@yandex/ymaps3-default-ui-theme@0.0');
+   const {YMapDefaultMarker}=await api.import('@yandex/ymaps3-default-ui-theme');
+   if(cancelled||!mapNode.current)return;
+   instance=new api.YMap(mapNode.current,{
+    location:{center:CENTER,zoom:zoomRef.current},
+    showScaleInCopyrights:true
+   },[
+    new api.YMapDefaultSchemeLayer({}),
+    new api.YMapDefaultFeaturesLayer({})
+   ]);
+   instance.addChild(new YMapDefaultMarker({
+    coordinates:CENTER,
+    title:'Qorako‘l tumani',
+    subtitle:'Buxoro viloyati',
+    color:'green',
+    size:'normal',
+    iconName:'fallback'
+   }));
+   mapRef.current=instance;setStatus('ready');
   }).catch(err=>{if(!cancelled){setError(err instanceof Error?err.message:'');setStatus('error')}});
   return()=>{cancelled=true;if(instance){instance.destroy();if(mapRef.current===instance)mapRef.current=null;}};
- },[t.center]);
+ },[]);
 
- function changeLayer(next:'hybrid'|'satellite'|'map'){setLayer(next);mapRef.current?.setType(next==='map'?'yandex#map':next==='satellite'?'yandex#satellite':'yandex#hybrid');}
- function fullscreen(){const node=mapNode.current?.parentElement;if(!node)return;if(document.fullscreenElement)void document.exitFullscreen();else void node.requestFullscreen?.();}
+ function changeZoom(delta:number){
+  zoomRef.current=Math.max(5,Math.min(19,zoomRef.current+delta));
+  mapRef.current?.setLocation({center:CENTER,zoom:zoomRef.current,duration:250});
+ }
+ function fullscreen(){
+  const node=mapNode.current?.closest('.ap-qmap-main');
+  if(!node)return;
+  if(document.fullscreenElement)void document.exitFullscreen();
+  else void node.requestFullscreen?.();
+ }
+ function openSatellite(){
+  window.open('https://yandex.uz/maps/?ll=63.840141%2C39.517043&z=14&l=sat%2Cskl','_blank','noopener,noreferrer');
+ }
 
  return <section className="ap-qmap">
   <header className="ap-qmap-head">
@@ -83,12 +117,13 @@ export default function QorakolFieldMap({fields,lang}:{fields:FieldItem[];lang:L
   <div className="ap-qmap-layout">
    <div className="ap-qmap-main">
     <div className="ap-qmap-toolbar">
-     <div className="ap-qmap-layer-label"><Layers size={16}/> {t.subtitle}</div>
+     <div className="ap-qmap-layer-label"><Layers size={16}/>{t.map}</div>
      <div className="ap-qmap-layer-buttons">
-      <button className={layer==='hybrid'?'active':''} onClick={()=>changeLayer('hybrid')}>{t.hybrid}</button>
-      <button className={layer==='satellite'?'active':''} onClick={()=>changeLayer('satellite')}><Satellite size={14}/>{t.satellite}</button>
-      <button className={layer==='map'?'active':''} onClick={()=>changeLayer('map')}>{t.map}</button>
-      <button className="ap-qmap-expand" onClick={fullscreen} title={t.fullscreen}><Maximize2 size={15}/></button>
+      <button className="active" type="button">{t.map}</button>
+      <button type="button" onClick={openSatellite}>{t.satellite}<ExternalLink size={12}/></button>
+      <button type="button" onClick={()=>changeZoom(1)} title={t.zoomIn}><ZoomIn size={15}/></button>
+      <button type="button" onClick={()=>changeZoom(-1)} title={t.zoomOut}><ZoomOut size={15}/></button>
+      <button className="ap-qmap-expand" type="button" onClick={fullscreen} title={t.fullscreen}><Maximize2 size={15}/></button>
      </div>
     </div>
     <div className="ap-qmap-canvas-wrap">
