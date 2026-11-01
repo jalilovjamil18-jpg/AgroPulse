@@ -14,7 +14,11 @@ class CabinetPeriodStatisticsTests(TestCase):
         User = get_user_model()
         self.user = User.objects.create_user(username='authority-test', password='Test-Only-Password-123!')
         self.district = District.objects.create(name='Test Qorako‘l')
-        Profile.objects.filter(user=self.user).update(role=Profile.AUTHORITY, district=self.district)
+        profile, _ = Profile.objects.get_or_create(user=self.user)
+        profile.role = Profile.AUTHORITY
+        profile.district = self.district
+        profile.save(update_fields=['role', 'district'])
+        self.user.agro_profile = profile
         self.area = Area.objects.create(district=self.district, name='Test area')
         self.canal = Canal.objects.create(district=self.district, area=self.area, name='Test canal', code='TEST-CANAL')
         self.station = Station.objects.create(canal=self.canal, name='Test station', code='TEST-ST-01')
@@ -22,7 +26,8 @@ class CabinetPeriodStatisticsTests(TestCase):
         self.client.force_authenticate(self.user)
 
     def add_reading(self, year, month, flow):
-        recorded_at = timezone.make_aware(datetime(year, month, 15, 12, 0))
+        minute = Reading.objects.filter(station=self.station).count()
+        recorded_at = timezone.make_aware(datetime(year, month, 15, 12, minute))
         return Reading.objects.create(
             station=self.station,
             recorded_at=recorded_at,
