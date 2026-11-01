@@ -63,7 +63,7 @@ export default function RealPilotCabinet(){
   <div className="ap-real-status"><CheckCircle2 size={18}/>{L.helper}<span>{L.role}: {L[role]}</span></div>
   <div className="ap-real-mobile-nav">{available.map(id=><button className={view===id?'selected':''} key={id} onClick={()=>setView(id)}>{L[id]}</button>)}</div>
   {view==='overview'&&<>
-  <CabinetPeriodAnalytics token={token} role={role}/>
+  <CabinetPeriodAnalytics token={token}/>
   <div className="ap-real-stats">{kpis.map(k=>{const K=k.icon;return <article key={k.label}><K size={23}/><small>{k.label}</small><strong>{k.value}</strong><span>{L.region}: {user.district?.name||'—'}</span></article>})}</div>
   <section className="ap-real-panel ap-cabinet-note">
     <h2><ShieldCheck size={20}/>{L.summary}</h2>
