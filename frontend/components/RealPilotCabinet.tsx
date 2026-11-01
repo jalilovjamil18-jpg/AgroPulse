@@ -2,6 +2,7 @@
 
 import PilotDeviceMonitoring from '@/components/PilotDeviceMonitoring';
 import PilotWaterBalance from '@/components/PilotWaterBalance';
+import PilotAnnualWaterBalance from '@/components/PilotAnnualWaterBalance';
 import {useEffect,useMemo,useState, type FormEvent} from 'react';
 import Link from 'next/link';
 import {Activity,ArrowLeft,BarChart3,BookOpenCheck,Bell,CalendarDays,CheckCircle2,ClipboardList,Download,Droplets,Eye,FileText,Landmark,LayoutDashboard,LockKeyhole,LogOut,MapPinned,RadioTower,RefreshCcw,Search,Shield,ShieldCheck,Sprout,Users,Waves,Wifi,AlertCircle,Plus} from 'lucide-react';
@@ -69,7 +70,7 @@ export default function RealPilotCabinet(){
     <p>{lang==='uz'?'Kabinetda faqat sizning vakolatingiz doirasidagi bazaga yozilgan haqiqiy ma’lumotlar ko‘rsatiladi. O‘lchov mavjud bo‘lmasa, raqam uydirilmaydi.':lang==='ru'?'Кабинет показывает только реальные записи базы в рамках ваших прав. При отсутствии измерений значения не придумываются.':'The cabinet shows only real database records within your permissions. Missing measurements are never fabricated.'}</p>
   </section>
  </>}
- {view==='balance'&&(role==='authority'||role==='admin')&&<PilotWaterBalance token={token} refreshKey={refreshKey}/> }
+ {view==='balance'&&(role==='authority'||role==='admin')&&<><PilotAnnualWaterBalance token={token}/><PilotWaterBalance token={token} refreshKey={refreshKey}/></> }
   {view==='devices'&&role!=='farmer'&&<PilotDeviceMonitoring token={token} role={role} refreshKey={refreshKey}/>}
   {view==='canals'&&<section className="ap-real-panel"><h2><Waves size={21}/>{L.canals}</h2>{!data.canals.length?<p className="ap-real-empty">{L.noData}</p>:<div className="ap-real-simple-grid">{data.canals.map(c=><article key={c.id}><Waves size={20}/><strong>{c.name}</strong><small>{c.code}</small></article>)}</div>}</section>}
   {view==='fields'&&<section className="ap-real-panel"><h2><Sprout size={21}/>{L.fields}</h2>{!data.fields.length?<p className="ap-real-empty">{L.noData}</p>:<div className="ap-real-table-scroll"><table><thead><tr><th>{L.name}</th><th>{L.crop}</th><th>{L.size}</th></tr></thead><tbody>{data.fields.map(f=><tr key={f.id}><td>{f.name}</td><td>{f.crop||'—'}</td><td>{f.area_ha}</td></tr>)}</tbody></table></div>}</section>}
