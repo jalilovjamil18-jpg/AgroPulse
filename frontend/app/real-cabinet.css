@@ -35,3 +35,47 @@
 .ap-device-state.awaiting_data{color:#d1dcff}.ap-device-state.unprovisioned{color:#ecb7b7}.ap-device-state.disabled{color:#96adba}
 @media(max-width:950px){.ap-device-counts{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:600px){.ap-device-counts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Monthly/yearly cabinet analytics: concise, role-scoped, real-data only */
+.ap-period{display:grid;gap:16px;border:1px solid #28516a;border-radius:18px;background:#0a2940;padding:21px;min-width:0}
+.ap-period-head,.ap-annual-head{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ap-period-head h2,.ap-annual-head h2{display:flex;align-items:center;gap:9px;margin:7px 0;font-size:22px}
+.ap-period-head h2 svg,.ap-annual-head h2 svg{color:#a9e66a}
+.ap-period-head p,.ap-annual-head p{margin:0;color:#a5c5d2;font-size:12px;line-height:1.5}
+.ap-period-controls{display:flex;align-items:end;gap:9px;flex-wrap:wrap}
+.ap-period-controls label,.ap-annual-head label{display:grid;gap:5px;color:#b7d1dc;font-size:11px}
+.ap-period-controls select,.ap-annual-head select{min-width:95px;padding:9px 10px;border:1px solid #41677a;border-radius:9px;background:#12384d;color:#f0fbff;color-scheme:dark}
+.ap-period-mode{display:flex;gap:4px;padding:4px;background:#092237;border:1px solid #31566a;border-radius:10px}
+.ap-period-mode button,.ap-period-apply,.ap-annual-head form button{display:flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:7px;padding:9px 12px;background:transparent;color:#c9e0e9;font-size:12px}
+.ap-period-mode button.selected,.ap-period-apply,.ap-annual-head form button{background:#a8e85d;color:#102b29;font-weight:800}
+.ap-period-apply:disabled,.ap-annual-head form button:disabled{opacity:.55}
+.ap-period-kpis,.ap-annual-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ap-period-kpis article,.ap-annual-kpis article{display:grid;align-content:start;gap:8px;min-width:0;padding:15px;border:1px solid #31596c;border-radius:13px;background:linear-gradient(145deg,#123c52,#0a283e)}
+.ap-period-kpis svg,.ap-annual-kpis svg{color:#b1eb69}
+.ap-period-kpis small,.ap-annual-kpis span{font-size:12px;color:#b3cfda}
+.ap-period-kpis strong,.ap-annual-kpis strong{font-size:25px;line-height:1.2;overflow-wrap:anywhere;color:#f1fbff}
+.ap-period-kpis em,.ap-annual-kpis strong small,.ap-annual-kpis em{font-size:11px;color:#a8c7d4;font-style:normal}
+.ap-period-detail{display:grid;grid-template-columns:minmax(150px,.65fr) minmax(0,2fr);gap:14px}
+.ap-period-period,.ap-period-months{padding:16px;border:1px solid #31566a;border-radius:13px;background:#0d3046}
+.ap-period-period{display:grid;align-content:start;gap:8px}
+.ap-period-period span,.ap-period-period small{color:#a7c6d3;font-size:12px}
+.ap-period-period strong{font-size:26px;color:#f1fbff}
+.ap-period-months h3{font-size:15px;margin:0 0 12px}
+.ap-period-chart{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;min-height:138px;align-items:end}
+.ap-period-column{display:grid;grid-template-rows:100px auto auto;gap:5px;min-width:0;text-align:center}
+.ap-period-bar-track{height:100px;display:flex;align-items:end;justify-content:center;border-radius:6px;background:#102b40;overflow:hidden}
+.ap-period-bar-track i{display:block;width:70%;min-height:0;border-radius:5px 5px 0 0;background:linear-gradient(0deg,#168da3,#b0e963)}
+.ap-period-column span{font-size:10px;color:#adc9d4}
+.ap-period-column small{font-size:9px;color:#d8e9ed;overflow:hidden;text-overflow:ellipsis}
+.ap-period-note{margin:0;color:#a4c2cf;font-size:11px;line-height:1.6}
+.ap-cabinet-note p{margin:0;color:#b4cbd7;font-size:13px;line-height:1.6}
+.ap-annual-balance{display:grid;gap:15px;padding:20px;border:1px solid #31576b;border-radius:17px;background:#0a2940}
+.ap-annual-head form{display:flex;align-items:end;gap:9px;flex-wrap:wrap}
+.ap-annual-head label{display:flex;flex-direction:column}
+.ap-annual-head label svg{display:none}
+.ap-annual-kpis article em{font-size:11px;color:#a8c7d4;font-style:normal}
+.ap-annual-missing{display:grid;gap:9px;color:#bbd3dc;font-size:12px}
+.ap-annual-missing div{display:flex;gap:7px;flex-wrap:wrap}
+.ap-annual-missing span{border:1px solid #46677a;background:#12364b;border-radius:20px;padding:6px 10px}
+@media(max-width:900px){.ap-period-kpis,.ap-annual-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.ap-period-detail{grid-template-columns:1fr}}
+@media(max-width:560px){.ap-period,.ap-annual-balance{padding:14px}.ap-period-head h2,.ap-annual-head h2{font-size:19px}.ap-period-controls{width:100%}.ap-period-mode{width:100%}.ap-period-mode button{flex:1}.ap-period-apply{flex:1}.ap-period-chart{gap:3px}.ap-period-column span{font-size:8px}.ap-period-column small{font-size:8px}.ap-period-kpis strong,.ap-annual-kpis strong{font-size:21px}}

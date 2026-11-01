@@ -1,0 +1,56 @@
+name: AgroPulse quality checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+      - feature/monthly-yearly-cabinet
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend TypeScript and source checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: TypeScript check
+        run: npm run lint
+        working-directory: frontend
+      - name: Source integrity check
+        run: npm run check:source
+        working-directory: frontend
+
+  backend:
+    name: Django checks and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend dependencies
+        run: python -m pip install -r requirements.txt
+        working-directory: backend
+      - name: Django system checks
+        run: python manage.py check
+        working-directory: backend
+      - name: Migration consistency
+        run: python manage.py makemigrations --check --dry-run
+        working-directory: backend
+      - name: Backend tests
+        run: python manage.py test
+        working-directory: backend
