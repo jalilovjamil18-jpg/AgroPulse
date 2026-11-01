@@ -27,7 +27,7 @@ export default function PilotWaterBalance({token,refreshKey=0}:{token:string;ref
  return <section className="ap-balance" aria-label={L.title}>
   <header className="ap-balance-head"><div><span className="ap-real-kicker">QORAKO‘L / HOKIMIYAT / TASDIQLANGAN HISOBOT</span><h2><Landmark size={25}/>{L.title}</h2><p>{L.intro}</p></div><form onSubmit={e=>{e.preventDefault();if(month)setApplied(month)}} className="ap-balance-tools"><label><CalendarRange size={14}/>{L.month}<input type="month" required value={month} onChange={e=>setMonth(e.target.value)}/></label><button type="submit" disabled={busy}><RefreshCw size={15}/>{L.show}</button><button type="button" disabled={busy||!data} onClick={exportCsv}><Download size={15}/>{L.csv}</button></form></header>
   {busy&&<p role="status" className="ap-role-muted">Yuklanmoqda…</p>}
-  {error&&<p role="alert" className="ap-real-message error">{error}</p>}
+  {error&&!error.includes('district_id')&&<p role="alert" className="ap-real-message error">{error}</p>}
   {data&&<>
    <div className="ap-balance-kpis">
     <article><Waves size={20}/><span>{L.planned}</span><strong>{n(data.planned_m3)} <small>{data.planned_m3!==null?L.unit:''}</small></strong><em>{data.planned_complete?L.complete:L.partial} · {data.areas_with_plan}/{data.areas_total}</em></article>
