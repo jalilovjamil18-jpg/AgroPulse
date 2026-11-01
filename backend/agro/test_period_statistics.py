@@ -14,7 +14,7 @@ class CabinetPeriodStatisticsTests(TestCase):
         User = get_user_model()
         self.user = User.objects.create_user(username='authority-test', password='Test-Only-Password-123!')
         self.district = District.objects.create(name='Test Qorako‘l')
-        Profile.objects.create(user=self.user, role=Profile.AUTHORITY, district=self.district)
+        Profile.objects.filter(user=self.user).update(role=Profile.AUTHORITY, district=self.district)
         self.area = Area.objects.create(district=self.district, name='Test area')
         self.canal = Canal.objects.create(district=self.district, area=self.area, name='Test canal', code='TEST-CANAL')
         self.station = Station.objects.create(canal=self.canal, name='Test station', code='TEST-ST-01')
