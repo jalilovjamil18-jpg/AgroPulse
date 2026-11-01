@@ -5,7 +5,7 @@ import PilotWaterBalance from '@/components/PilotWaterBalance';
 import PilotAnnualWaterBalance from '@/components/PilotAnnualWaterBalance';
 import {useEffect,useMemo,useState, type FormEvent} from 'react';
 import Link from 'next/link';
-import {Activity,ArrowLeft,BarChart3,BookOpenCheck,Bell,CalendarDays,CheckCircle2,ClipboardList,Download,Droplets,Eye,FileText,Landmark,LayoutDashboard,LockKeyhole,LogOut,MapPinned,RadioTower,RefreshCcw,Search,Shield,ShieldCheck,Sprout,Users,Waves,Wifi,AlertCircle,Plus} from 'lucide-react';
+import {Activity,BarChart3,BookOpenCheck,CheckCircle2,Download,Droplets,Landmark,LayoutDashboard,LockKeyhole,LogOut,MapPinned,RadioTower,RefreshCcw,Search,Shield,ShieldCheck,Sprout,Waves,Plus} from 'lucide-react';
 import {useLanguage} from '@/components/LanguageProvider';
 import CabinetPeriodAnalytics from '@/components/CabinetPeriodAnalytics';
 import {API_BASE,apiRequest,loadPilotData,type PilotData,type Reading,type Role,type Station,type User} from '@/lib/realApi';
