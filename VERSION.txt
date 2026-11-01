@@ -1,0 +1,8 @@
+AgroPulse Qorako‘l Full Stack Pilot v0.5
+- Per-station device ingestion receipt tracking and territory-scoped /dashboard/devices/
+- Dedicated interactive Device Monitoring view for authority/irrigation/admin
+- Secure explicit device key rotate/revoke and idempotent sensor retries
+- Measurement timestamp age guard configurable via AGRO_DEVICE_MAX_AGE_DAYS
+- PostgreSQL connection readiness check and read-only pilot_preflight
+- Migration 0003 and device permission/ingestion regression tests
+- No fabricated district data or inferred m³ from instantaneous l/s

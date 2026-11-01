@@ -1,0 +1,221 @@
+/* AgroPulse v1.12 - Header interaction only. The original white/green design remains intact. */
+.aw-header.aw-header--motion{
+  position:fixed;top:0;left:0;right:0;z-index:110;
+  pointer-events:none;
+}
+.aw-header--motion .aw-header-inner{
+  position:relative;
+  pointer-events:auto;
+  transition:width .52s cubic-bezier(.22,1,.36,1),
+    min-height .45s cubic-bezier(.22,1,.36,1),
+    padding .45s cubic-bezier(.22,1,.36,1),
+    background-color .35s ease,box-shadow .35s ease,
+    border-radius .45s cubic-bezier(.22,1,.36,1);
+  will-change:width;
+}
+.aw-header--motion .aw-logo{
+  transition:transform .42s cubic-bezier(.22,1,.36,1),margin .42s cubic-bezier(.22,1,.36,1);
+}
+.aw-header--scrolled .aw-header-inner{
+  background:rgba(255,255,255,.94);
+  box-shadow:0 12px 45px rgba(3,30,35,.24);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+}
+/* A short fade softens the menu entering and leaving the compact capsule. */
+.aw-header--motion .aw-nav,
+.aw-header--motion .aw-header-actions{
+  transition:opacity .25s ease, transform .3s cubic-bezier(.22,1,.36,1), visibility .25s;
+}
+.aw-header--motion.aw-header--scrolled:not(.aw-header--compact) .aw-nav,
+.aw-header--motion.aw-header--scrolled:not(.aw-header--compact) .aw-header-actions{
+  transition-delay:.13s;
+}
+/* Underline grows from left to right like the reference navigation. */
+.aw-header--motion .aw-nav a::after{
+  left:0;right:auto;width:100%;bottom:-9px;
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+}
+.aw-header--motion .aw-nav a:hover::after,
+.aw-header--motion .aw-nav a:focus-visible::after{
+  right:auto;transform:scaleX(1);
+}
+.aw-header--motion .aw-nav a:focus-visible,
+.aw-header--motion .aw-logo:focus-visible,
+.aw-header--motion .aw-header-actions a:focus-visible,
+.aw-header--motion .aw-menu-btn:focus-visible{
+  outline:2px solid #2e9e5b;outline-offset:5px;
+}
+/* On downward scroll, only the brand remains. On upward scroll the full panel returns. */
+.aw-header--motion.aw-header--compact .aw-header-inner{
+  width:min(268px,calc(100% - 34px));
+  min-height:58px;
+  padding:6px 18px;
+  justify-content:center;
+  border-radius:16px;
+  box-shadow:0 12px 36px rgba(4,31,39,.21);
+}
+.aw-header--motion.aw-header--compact .aw-logo{margin-inline:auto;transform:scale(.92)}
+.aw-header--motion.aw-header--compact .aw-nav,
+.aw-header--motion.aw-header--compact .aw-header-actions{
+  position:absolute;visibility:hidden;opacity:0;transform:translateY(-7px);pointer-events:none;
+  transition:opacity .14s ease, transform .25s ease, visibility 0s linear .14s;
+}
+.aw-header--motion .aw-mobile-menu{pointer-events:auto}
+@media(max-width:1060px){
+  /* Mobile navigation stays accessible instead of collapsing on scroll. */
+  .aw-header--motion.aw-header--compact .aw-header-inner{
+    width:min(1390px,100%);min-height:61px;padding:8px 12px;
+    justify-content:space-between;
+  }
+  .aw-header--motion.aw-header--compact .aw-nav,
+  .aw-header--motion.aw-header--compact .aw-header-actions{position:static;visibility:visible;opacity:1;pointer-events:auto}
+  .aw-header--motion.aw-header--compact .aw-logo{margin:0;transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .aw-header--motion .aw-header-inner,
+  .aw-header--motion .aw-logo,
+  .aw-header--motion .aw-nav a::after{transition-duration:0.01ms!important;animation:none!important}
+}
+
+/* v1.14: the SAME collapse/expand motion on all platform and farmer pages.
+   Keep platform-specific links instead of replacing them with corporate anchors. */
+.ap10-header.ap10-header--motion{
+  position:fixed;top:0;left:0;right:0;z-index:110;
+  padding:18px 34px 0;background:transparent;box-shadow:none;border:0;
+  pointer-events:none;backdrop-filter:none;
+}
+.ap10-header--motion .ap10-header-inner{
+  pointer-events:auto;width:min(1390px,100%);min-height:69px;
+  margin:auto;padding:8px 17px;background:rgba(255,255,255,.96);
+  border:1px solid rgba(232,243,233,.92);border-radius:17px;
+  box-shadow:0 18px 50px rgba(4,23,45,.16);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transition:width .52s cubic-bezier(.22,1,.36,1),
+    min-height .45s cubic-bezier(.22,1,.36,1),
+    padding .45s cubic-bezier(.22,1,.36,1),
+    background-color .35s ease,box-shadow .35s ease,
+    border-radius .45s cubic-bezier(.22,1,.36,1);
+}
+.ap10-header--motion .ap10-brand{
+  transition:transform .42s cubic-bezier(.22,1,.36,1),margin .42s cubic-bezier(.22,1,.36,1);
+}
+.ap10-header--motion .ap10-nav,.ap10-header--motion .ap10-header-actions{
+  transition:opacity .25s ease,transform .3s cubic-bezier(.22,1,.36,1),visibility .25s;
+}
+.ap10-header--scrolled .ap10-header-inner{
+  background:rgba(255,255,255,.94);box-shadow:0 12px 45px rgba(3,30,35,.24);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+.ap10-header--motion .ap10-nav>a{position:relative}
+.ap10-header--motion .ap10-nav>a::after{
+  content:'';position:absolute;bottom:2px;left:12px;right:12px;height:2px;
+  border-radius:2px;background:#2e9e5b;
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+}
+.ap10-header--motion .ap10-nav>a:hover::after,.ap10-header--motion .ap10-nav>a:focus-visible::after,
+.ap10-header--motion .ap10-nav>a.is-active::after{transform:scaleX(1)}
+.ap10-header--compact .ap10-header-inner{
+  width:min(268px,calc(100% - 34px));min-height:58px;
+  padding:6px 18px;justify-content:center;border-radius:16px;
+  box-shadow:0 12px 36px rgba(4,31,39,.21);
+}
+.ap10-header--compact .ap10-brand{margin-inline:auto;transform:scale(.92)}
+.ap10-header--compact .ap10-nav,.ap10-header--compact .ap10-header-actions{
+  position:absolute;visibility:hidden;opacity:0;transform:translateY(-7px);pointer-events:none;
+  transition:opacity .14s ease,transform .25s ease,visibility 0s linear .14s;
+}
+.ap10-header--motion .ap10-mobile{pointer-events:auto}
+@media(max-width:1060px){
+  .ap10-header.ap10-header--motion{padding:10px 12px 0}
+  .ap10-header--motion .ap10-header-inner{min-height:61px}
+  .ap10-header--compact .ap10-header-inner{
+    width:min(1390px,100%);min-height:61px;padding:8px 12px;justify-content:space-between;
+  }
+  .ap10-header--compact .ap10-nav,.ap10-header--compact .ap10-header-actions{
+    position:static;visibility:visible;opacity:1;pointer-events:auto
+  }
+  .ap10-header--compact .ap10-brand{margin:0;transform:none}
+}
+@media(max-width:800px){
+  .ap10-header--motion .ap10-mobile{top:82px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ap10-header--motion .ap10-header-inner,.ap10-header--motion .ap10-brand,
+  .ap10-header--motion .ap10-nav,.ap10-header--motion .ap10-header-actions,
+  .ap10-header--motion .ap10-nav>a::after{transition-duration:0.01ms!important;animation:none!important}
+}
+
+/* Override pre-v1.14 global !important sticky floating header styling. */
+.topbar.ap10-header.ap10-header--motion{
+  position:fixed!important;top:0!important;left:0;right:0;
+  margin:0!important;z-index:110;pointer-events:none
+}
+.ap10-header.ap10-header--motion .ap10-header-inner{
+  width:min(1390px,100%)!important;max-width:1390px;
+  min-height:69px!important;margin:0 auto!important;padding:8px 17px!important
+}
+.ap10-header.ap10-header--scrolled .ap10-header-inner{
+  background:rgba(255,255,255,.94)!important
+}
+.ap10-header.ap10-header--compact .ap10-header-inner{
+  width:min(268px,calc(100% - 34px))!important;
+  max-width:268px;min-height:58px!important;padding:6px 18px!important;
+  margin:0 auto!important
+}
+@media(max-width:1060px){
+  .ap10-header.ap10-header--motion .ap10-header-inner,
+  .ap10-header.ap10-header--compact .ap10-header-inner{
+    width:100%!important;max-width:1390px;min-height:61px!important;
+    padding:8px 12px!important;margin:0 auto!important
+  }
+}
+
+/* Final localization and keyboard/mobile safety adjustments. */
+html{scroll-padding-top:110px}
+[id]{scroll-margin-top:105px}
+.aw-header--motion .aw-header-inner, .ap10-header--motion .ap10-header-inner{min-width:0}
+.aw-header--motion .aw-header-actions, .ap10-header--motion .ap10-header-actions{flex-shrink:0}
+.aw-header--motion .aw-nav, .ap10-header--motion .ap10-nav{min-width:0}
+.aw-site h1,.aw-site h2,.aw-site h3,.aw-site p,
+.ap10-header a,.aw-header a,.awfin-tech-card strong,.awfin-info p,
+.aw-audience-detail li,.awp-app,.awp-app strong{overflow-wrap:break-word;hyphens:auto}
+.aw-header--motion .aw-nav a,.ap10-header--motion .ap10-nav a{white-space:normal;text-wrap:balance;text-align:center}
+.ap10-header--motion .ap10-nav>a,.ap10-header--motion .ap10-more-trigger{line-height:1.3}
+@media(max-width:1370px){
+  .aw-header--motion .aw-nav{gap:7px}
+  .aw-header--motion .aw-nav a{font-size:10px}
+  .aw-header--motion .aw-nav-platform{display:none}
+}
+/* Russian and English strings need room; use accessible mobile navigation earlier. */
+@media(max-width:1220px){
+  .aw-header--motion .aw-nav{display:none}
+  .aw-header--motion .aw-menu-btn{display:inline-flex}
+  .ap10-header--motion .ap10-nav{display:none}
+  .ap10-header--motion .ap10-menu-toggle{display:flex}
+}
+@media(max-width:600px){
+  .aw-header--motion .aw-header-inner,.ap10-header--motion .ap10-header-inner{gap:6px}
+  .aw-header--motion .aw-logo{min-width:0}
+  .aw-header--motion .aw-logo strong{font-size:19px}
+  .ap10-header--motion .ap10-dashboard>span{display:none}
+  .ap10-header--motion .ap10-header-search{display:none}
+  .ap10-header--motion .ap10-header-actions{gap:5px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}}
+
+/* The public header gains a water-monitoring link; keep all desktop entries legible.
+   Below 1450px the compact mobile navigation displays all links rather than
+   squeezing their labels. The existing scroll-to-logo animation remains. */
+@media (min-width:1221px) and (max-width:1450px){
+  .aw-header--motion .aw-nav{display:none}
+  .aw-header--motion .aw-menu-btn{display:inline-flex}
+}
+@media(min-width:1451px) and (max-width:1650px){
+  .aw-header--motion .aw-header-inner{gap:12px}
+  .aw-header--motion .aw-nav{gap:8px}
+  .aw-header--motion .aw-nav a{font-size:10px}
+  .aw-header--motion .aw-nav-platform{display:none}
+}

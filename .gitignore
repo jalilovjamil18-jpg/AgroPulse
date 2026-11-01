@@ -1,0 +1,34 @@
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/.env.production.local
+backend/.venv/
+backend/.env
+backend/db.sqlite3
+backend/staticfiles/
+*.pyc
+__pycache__/
+.pytest_cache/
+*.log
+*.tsbuildinfo
+npm-cache/
+temp/
+.DS_Store
+pip-cache/
+backups/
+
+# Protect all environment files
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+# Local database files
+**/*.sqlite3
+**/*.sqlite3-journal
+
+# Private keys and certificates
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
