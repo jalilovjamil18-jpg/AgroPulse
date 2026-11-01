@@ -120,3 +120,106 @@ def export_monthly_balance(request):
                          formatted(obj.planned_m3) or '', formatted(obj.actual_m3) or '',
                          ratio(obj.actual_m3, obj.planned_m3) or '', safe_csv(obj.document_reference), obj.verified_at.isoformat() if obj.verified_at else ''])
     return response
+
+
+@api_view(['GET'])
+def annual_balance(request):
+    """Verified document-backed annual m³ summary, with partial coverage shown explicitly."""
+    district = scope(request)
+    year_text = request.query_params.get('year') or str(timezone.localdate().year)
+    if len(year_text) != 4 or not year_text.isdigit():
+        raise ValidationError({'year': 'Yil YYYY formatida bo‘lishi kerak.'})
+    year = int(year_text)
+    current_year = timezone.localdate().year
+    if year < 2000 or year > current_year:
+        raise ValidationError({'year': f'Yil 2000–{current_year} oralig‘ida bo‘lishi kerak.'})
+
+    through_month = timezone.localdate().month if year == current_year else 12
+    start = date(year, 1, 1)
+    end = date(year, through_month, 1)
+    qs = (WaterBalance.objects.filter(
+        area__district=district,
+        month__gte=start,
+        month__lte=end,
+        is_verified=True,
+    ).select_related('area', 'verified_by').order_by('area__name', 'month'))
+
+    rows = list(qs[:12001])
+    if len(rows) > 12000:
+        return Response({'detail': 'Yillik hisobotda 12000 tadan ortiq yozuv bor.'}, status=413)
+
+    grouped = {}
+    for item in rows:
+        entry = grouped.setdefault(item.area_id, {
+            'area_id': item.area_id,
+            'area': item.area.name,
+            'planned_values': [],
+            'actual_values': [],
+            'paired_plan': Decimal('0'),
+            'paired_actual': Decimal('0'),
+            'paired_months': 0,
+            'months': set(),
+            'documents': 0,
+        })
+        entry['months'].add(item.month.strftime('%Y-%m'))
+        entry['documents'] += 1
+        if item.planned_m3 is not None:
+            entry['planned_values'].append(item.planned_m3)
+        if item.actual_m3 is not None:
+            entry['actual_values'].append(item.actual_m3)
+        if item.planned_m3 is not None and item.actual_m3 is not None:
+            entry['paired_plan'] += item.planned_m3
+            entry['paired_actual'] += item.actual_m3
+            entry['paired_months'] += 1
+
+    area_count = Area.objects.filter(district=district).count()
+    plan_values = [v for item in rows for v in [item.planned_m3] if v is not None]
+    actual_values = [v for item in rows for v in [item.actual_m3] if v is not None]
+    paired_plan = sum((item.paired_plan for item in grouped.values()), Decimal('0'))
+    paired_actual = sum((item.paired_actual for item in grouped.values()), Decimal('0'))
+    annual_rows = []
+    for item in grouped.values():
+        plan = sum(item['planned_values'], Decimal('0')) if item['planned_values'] else None
+        actual = sum(item['actual_values'], Decimal('0')) if item['actual_values'] else None
+        annual_rows.append({
+            'area_id': item['area_id'],
+            'area': item['area'],
+            'planned_m3': formatted(plan),
+            'actual_m3': formatted(actual),
+            'utilization_pct': ratio(item['paired_actual'], item['paired_plan']),
+            'months_verified': len(item['months']),
+            'paired_months': item['paired_months'],
+            'document_count': item['documents'],
+        })
+
+    expected_area_months = area_count * through_month
+    verified_area_months = len(rows)
+    return Response({
+        'district': {'id': district.id, 'name': district.name},
+        'year': year,
+        'through_month': through_month,
+        'unit': 'm³',
+        'data_source': 'verified_source_documents',
+        'demo': False,
+        'areas_total': area_count,
+        'areas_with_records': len(grouped),
+        'verified_area_months': verified_area_months,
+        'expected_area_months': expected_area_months,
+        'coverage_pct': (
+            str((Decimal(verified_area_months) * Decimal('100') / Decimal(expected_area_months)).quantize(Decimal('0.1')))
+            if expected_area_months else None
+        ),
+        'planned_m3': formatted(sum(plan_values, Decimal('0'))) if plan_values else None,
+        'actual_m3': formatted(sum(actual_values, Decimal('0'))) if actual_values else None,
+        'areas_with_plan': len({item.area_id for item in rows if item.planned_m3 is not None}),
+        'areas_with_actual': len({item.area_id for item in rows if item.actual_m3 is not None}),
+        'paired_utilization_pct': ratio(paired_actual, paired_plan) if paired_plan else None,
+        'rows': annual_rows,
+        'missing_areas': list(Area.objects.filter(district=district).exclude(
+            id__in=list(grouped.keys())).order_by('name').values('id', 'name')[:500]),
+        'notice': (
+            'Yillik m³ faqat administrator tasdiqlagan hujjatli oylik yozuvlar yig‘indisi. '
+            'Qamrov joriy yil uchun yil boshidan joriy oygacha hisoblanadi. '
+            'Qisman ma’lumotlar to‘liq yillik natija deb talqin qilinmasin; sensor l/s yozuvlaridan m³ olinmagan.'
+        ),
+    })
