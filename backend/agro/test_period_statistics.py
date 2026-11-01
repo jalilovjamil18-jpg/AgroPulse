@@ -111,7 +111,8 @@ class CabinetPeriodStatisticsTests(TestCase):
             created_by=self.user,
         )
         # An unverified draft must never be included in the annual totals.
-        draft_month = min(3, timezone.localdate().month)
+        used_months = {month_one, month_two, 12}
+        draft_month = next(month for month in range(1, 13) if month not in used_months)
         if draft_month not in (month_one, month_two):
             WaterBalance.objects.create(
                 area=self.area,
