@@ -79,3 +79,54 @@
 .ap-annual-missing span{border:1px solid #46677a;background:#12364b;border-radius:20px;padding:6px 10px}
 @media(max-width:900px){.ap-period-kpis,.ap-annual-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.ap-period-detail{grid-template-columns:1fr}}
 @media(max-width:560px){.ap-period,.ap-annual-balance{padding:14px}.ap-period-head h2,.ap-annual-head h2{font-size:19px}.ap-period-controls{width:100%}.ap-period-mode{width:100%}.ap-period-mode button{flex:1}.ap-period-apply{flex:1}.ap-period-chart{gap:3px}.ap-period-column span{font-size:8px}.ap-period-column small{font-size:8px}.ap-period-kpis strong,.ap-annual-kpis strong{font-size:21px}}
+
+
+/* Qorako‘l district interactive map */
+.ap-qmap{display:grid;gap:15px;min-width:0}
+.ap-qmap-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.ap-qmap-head h2{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:22px;color:#f3fbff}
+.ap-qmap-head h2 svg{color:#a8e94e}
+.ap-qmap-head p{margin:0;color:#9bb9c8;font-size:13px}
+.ap-qmap-head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ap-qmap-head-actions span,.ap-qmap-head-actions a{display:inline-flex;align-items:center;gap:7px;border:1px solid #315b6d;background:#10354a;border-radius:10px;padding:9px 11px;color:#cde7e9;text-decoration:none;font-size:12px}
+.ap-qmap-head-actions span svg{color:#a8e94e}
+.ap-qmap-layout{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(260px,.8fr);gap:14px;align-items:stretch}
+.ap-qmap-main,.ap-qmap-side{min-width:0;border:1px solid #28536a;border-radius:17px;background:#0a2940;overflow:hidden}
+.ap-qmap-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:#0d3048;border-bottom:1px solid #28536a;flex-wrap:wrap}
+.ap-qmap-layer-label{display:flex;align-items:center;gap:8px;color:#b9d3df;font-size:12px;font-weight:700}
+.ap-qmap-layer-buttons{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ap-qmap-layer-buttons button{display:inline-flex;align-items:center;gap:5px;border:1px solid #315b70;background:#12384f;color:#c7dce7;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700}
+.ap-qmap-layer-buttons button.active{background:#a6e83f;color:#14322b;border-color:#a6e83f}
+.ap-qmap-layer-buttons .ap-qmap-expand{padding:7px 9px}
+.ap-qmap-canvas-wrap{height:570px;position:relative;background:#dce6e8}
+.ap-qmap-canvas{width:100%;height:100%;min-height:380px}
+.ap-qmap-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:25px;background:#09243bdc;color:#e8f4f8;font-size:13px;line-height:1.7;z-index:2}
+.ap-qmap-error{background:#102e42ee;color:#ffe5b7}
+.ap-qmap-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;color:#8eb4c5;font-size:11px;flex-wrap:wrap}
+.ap-qmap-foot span:first-child{display:flex;gap:6px;align-items:center}
+.ap-qmap-foot svg{color:#a6e83f}
+.ap-qmap-side{padding:15px;display:flex;flex-direction:column;gap:13px}
+.ap-qmap-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ap-qmap-stats article{display:grid;gap:6px;padding:12px;background:#10344b;border:1px solid #28556c;border-radius:12px}
+.ap-qmap-stats article svg{color:#a7e94b}
+.ap-qmap-stats article span{font-size:10px;color:#a9c4d1}
+.ap-qmap-stats article strong{font-size:22px;color:#f1f8fa}
+.ap-qmap-stats article strong small{font-size:11px;color:#9bbac7}
+.ap-qmap-list-head{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.ap-qmap-list-head h3{margin:0;color:#eaf5f8;font-size:15px}
+.ap-qmap-list-head span{font-size:11px;color:#b5ed6c}
+.ap-qmap-search{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid #315a70;border-radius:9px;color:#86aebe;background:#08243a}
+.ap-qmap-search input{min-width:0;width:100%;border:0;outline:0;background:transparent;color:#eaf6fa;font-size:12px}
+.ap-qmap-field-list{display:grid;gap:7px;max-height:225px;overflow:auto}
+.ap-qmap-field-list article{display:grid;gap:4px;padding:10px;border:1px solid #2b5266;background:#0d3048;border-radius:10px}
+.ap-qmap-field-list strong{font-size:12px;color:#e8f5f8}
+.ap-qmap-field-list span,.ap-qmap-field-list small{font-size:10px;color:#9ab9c7}
+.ap-qmap-field-list small{color:#e0bc7d}
+.ap-qmap-empty{margin:0;padding:18px 12px;border:1px dashed #3b6273;border-radius:11px;color:#a5c0cc;text-align:center;font-size:12px;line-height:1.6}
+.ap-qmap-note{display:flex;gap:8px;align-items:flex-start;margin-top:auto;padding:11px;border:1px solid #345d4b;background:#123b3d;border-radius:10px;color:#c7e6cb}
+.ap-qmap-note svg{flex:none;color:#a9e85a}
+.ap-qmap-note p{margin:0;font-size:10px;line-height:1.6}
+.ap-qmap-main:fullscreen{background:#0a2940;padding:10px;display:flex;flex-direction:column}
+.ap-qmap-main:fullscreen .ap-qmap-canvas-wrap{flex:1;height:auto;min-height:0}
+@media(max-width:1050px){.ap-qmap-layout{grid-template-columns:1fr}.ap-qmap-side{display:grid;grid-template-columns:1fr 1fr}.ap-qmap-stats{grid-column:1/-1}.ap-qmap-note{margin-top:0}}
+@media(max-width:620px){.ap-qmap-canvas-wrap{height:440px}.ap-qmap-side{display:flex}.ap-qmap-head h2{font-size:19px}.ap-qmap-toolbar{align-items:flex-start}.ap-qmap-layer-buttons{width:100%}.ap-qmap-layer-buttons button{flex:1;justify-content:center}.ap-qmap-foot{font-size:10px}}
