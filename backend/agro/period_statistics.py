@@ -1,5 +1,5 @@
 """Monthly and yearly cabinet indicators based only on authorized real readings."""
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
 from django.db.models import Avg, Count
@@ -98,7 +98,10 @@ def period_statistics(request):
     if period_type == "month":
         month_keys = [first.strftime("%Y-%m")]
     else:
-        month_keys = [f"{year}-{number:02d}" for number in range(1, 13)]
+        last_month = today.month if year == today.year else 12
+        month_keys = [f"{year}-{number:02d}" for number in range(1, last_month + 1)]
+
+    period_end = min(next_month - timedelta(days=1), today)
 
     monthly = [
         by_month.get(key, {
@@ -118,7 +121,7 @@ def period_statistics(request):
             "year": year,
             "month": month,
             "from": first.isoformat(),
-            "to": (next_month.fromordinal(next_month.toordinal() - 1)).isoformat(),
+            "to": period_end.isoformat(),
         },
         "summary": {
             "readings_count": totals["readings_count"],
