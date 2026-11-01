@@ -40,7 +40,7 @@ export default function PilotAnnualWaterBalance({token}:{token:string}){
    <form onSubmit={e=>{e.preventDefault();setApplied(year)}}><label><CalendarRange size={15}/>{t.year}<select value={year} onChange={e=>setYear(e.target.value)}>{years.map(y=><option key={y}>{y}</option>)}</select></label><button type="submit" disabled={busy}>{t.show}</button></form>
   </header>
   {busy&&<p className="ap-role-muted">{t.loading}</p>}
-  {error&&<p role="alert" className="ap-real-message error">{t.error} {error}</p>}
+  {error&&!error.includes('district_id')&&<p role="alert" className="ap-real-message error">{t.error} {error}</p>}
   {data&&<>
    <div className="ap-annual-kpis">
     <article><Waves size={19}/><span>{t.planned}</span><strong>{number(data.planned_m3,lang)} <small>{data.planned_m3!==null?'m³':''}</small></strong><em>{data.areas_with_plan}/{data.areas_total} {t.area.toLowerCase()}</em></article>
