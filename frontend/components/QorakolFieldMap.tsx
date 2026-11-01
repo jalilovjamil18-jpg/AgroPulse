@@ -22,7 +22,7 @@ type YMaps3={
 };
 declare global {interface Window {ymaps3?:YMaps3}}
 
-const CENTER:[number,number]=[63.840141,39.517043];
+const CENTER:[number,number]=[63.85556,39.50278];
 
 function loadYandexMaps(key:string):Promise<YMaps3>{
  return new Promise((resolve,reject)=>{
@@ -106,13 +106,13 @@ export default function QorakolFieldMap({fields,lang}:{fields:FieldItem[];lang:L
   else void node.requestFullscreen?.();
  }
  function openSatellite(){
-  window.open('https://yandex.uz/maps/?ll=63.840141%2C39.517043&z=14&l=sat%2Cskl','_blank','noopener,noreferrer');
+  window.open('https://yandex.uz/maps/?ll=63.85556%2C39.50278&z=14&l=sat%2Cskl','_blank','noopener,noreferrer');
  }
 
  return <section className="ap-qmap">
   <header className="ap-qmap-head">
    <div><span className="ap-real-kicker">AGROPULSE / QORAKO‘L / {t.real}</span><h2><MapPin size={22}/>{t.title}</h2><p>{t.subtitle}</p></div>
-   <div className="ap-qmap-head-actions"><span><ShieldCheck size={14}/>{t.real}</span><a href="https://yandex.uz/maps/?ll=63.840141%2C39.517043&z=12" target="_blank" rel="noreferrer">{t.open}<ExternalLink size={14}/></a></div>
+   <div className="ap-qmap-head-actions"><span><ShieldCheck size={14}/>{t.real}</span><a href="https://yandex.uz/maps/?ll=63.85556%2C39.50278&z=12" target="_blank" rel="noreferrer">{t.open}<ExternalLink size={14}/></a></div>
   </header>
   <div className="ap-qmap-layout">
    <div className="ap-qmap-main">
@@ -132,7 +132,7 @@ export default function QorakolFieldMap({fields,lang}:{fields:FieldItem[];lang:L
      {status==='missing'&&<div className="ap-qmap-overlay ap-qmap-error">{t.noKey}</div>}
      {status==='error'&&<div className="ap-qmap-overlay ap-qmap-error">{t.failed} {error}</div>}
     </div>
-    <div className="ap-qmap-foot"><span><MapPin size={14}/>{t.center}</span><span>39.517043, 63.840141</span></div>
+    <div className="ap-qmap-foot"><span><MapPin size={14}/>{t.center}</span><span>39.50278, 63.85556</span></div>
    </div>
    <aside className="ap-qmap-side">
     <div className="ap-qmap-stats"><article><Sprout size={18}/><span>{t.total}</span><strong>{fields.length}</strong></article><article><Layers size={18}/><span>{t.hectares}</span><strong>{new Intl.NumberFormat('uz-UZ',{maximumFractionDigits:2}).format(totalArea)} <small>ga</small></strong></article></div>
