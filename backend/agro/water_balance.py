@@ -175,8 +175,8 @@ def annual_balance(request):
     area_count = Area.objects.filter(district=district).count()
     plan_values = [v for item in rows for v in [item.planned_m3] if v is not None]
     actual_values = [item.actual_m3 for item in rows if item.actual_m3 is not None and item.month.month <= through_month]
-    paired_plan = sum((item.paired_plan for item in grouped.values()), Decimal('0'))
-    paired_actual = sum((item.paired_actual for item in grouped.values()), Decimal('0'))
+    paired_plan = sum((item['paired_plan'] for item in grouped.values()), Decimal('0'))
+    paired_actual = sum((item['paired_actual'] for item in grouped.values()), Decimal('0'))
     annual_rows = []
     for item in grouped.values():
         plan = sum(item['planned_values'], Decimal('0')) if item['planned_values'] else None
