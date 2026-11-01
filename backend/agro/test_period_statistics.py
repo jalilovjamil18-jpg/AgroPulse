@@ -98,6 +98,18 @@ class CabinetPeriodStatisticsTests(TestCase):
                 verified_by=self.user,
                 created_by=self.user,
             )
+        # A future-month plan contributes to the annual plan, but not to actual-to-date.
+        WaterBalance.objects.create(
+            area=self.area,
+            month=datetime(year, 12, 1).date(),
+            planned_m3=Decimal('50.000'),
+            actual_m3=None,
+            document_reference='Approved future-month plan',
+            is_verified=True,
+            verified_at=timezone.now(),
+            verified_by=self.user,
+            created_by=self.user,
+        )
         # An unverified draft must never be included in the annual totals.
         draft_month = min(3, timezone.localdate().month)
         if draft_month not in (month_one, month_two):
@@ -113,7 +125,7 @@ class CabinetPeriodStatisticsTests(TestCase):
 
         response = self.client.get('/api/v1/dashboard/water-balance/annual/', {'year': year})
         self.assertEqual(response.status_code, 200)
-        expected_plan = Decimal('300.000') if month_two != month_one else Decimal('100.000')
+        expected_plan = Decimal('350.000') if month_two != month_one else Decimal('150.000')
         expected_actual = Decimal('180.000') if month_two != month_one else Decimal('80.000')
         self.assertEqual(Decimal(response.data['planned_m3']), expected_plan)
         self.assertEqual(Decimal(response.data['actual_m3']), expected_actual)
