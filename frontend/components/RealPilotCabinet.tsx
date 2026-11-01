@@ -1,17 +1,15 @@
 'use client';
 
 import PilotDeviceMonitoring from '@/components/PilotDeviceMonitoring';
-import PilotDataQuality from '@/components/PilotDataQuality';
 import PilotWaterBalance from '@/components/PilotWaterBalance';
 import {useEffect,useMemo,useState, type FormEvent} from 'react';
 import Link from 'next/link';
 import {Activity,ArrowLeft,BarChart3,BookOpenCheck,Bell,CalendarDays,CheckCircle2,ClipboardList,Download,Droplets,Eye,FileText,Landmark,LayoutDashboard,LockKeyhole,LogOut,MapPinned,RadioTower,RefreshCcw,Search,Shield,ShieldCheck,Sprout,Users,Waves,Wifi,AlertCircle,Plus} from 'lucide-react';
 import {useLanguage} from '@/components/LanguageProvider';
-import PilotRoleInsights from '@/components/PilotRoleInsights';
-import PilotAlerts from '@/components/PilotAlerts';
-import {API_BASE,apiRequest,loadPilotData,type Alert,type PilotData,type Reading,type Role,type Station,type User} from '@/lib/realApi';
+import CabinetPeriodAnalytics from '@/components/CabinetPeriodAnalytics';
+import {API_BASE,apiRequest,loadPilotData,type PilotData,type Reading,type Role,type Station,type User} from '@/lib/realApi';
 
-type View='overview'|'canals'|'readings'|'fields'|'alerts'|'balance'|'devices';
+type View='overview'|'canals'|'readings'|'fields'|'balance'|'devices';
 type Lang='uz'|'ru'|'en';
 const text={
  uz:{login:'Tizimga kirish',real:'Haqiqiy ma’lumotlar kabineti',user:'Foydalanuvchi nomi',password:'Parol',submit:'Kirish',logout:'Chiqish',loading:'Ma’lumot yuklanmoqda...',noData:'Hozircha ma’lumot kiritilmagan',error:'API bilan aloqa yo‘q. Backendni tekshiring.',refresh:'Yangilash',role:'Vakolat',overview:'Umumiy holat',canals:'Kanallar',readings:'O‘lchovlar',fields:'Maydonlar',alerts:'Ogohlantirishlar',balance:'Suv balansi',devices:'Qurilmalar',none:'—',site:'Asosiy sayt',summary:'Joriy ko‘rsatkichlar',totalCanals:'Kanallar',totalAreas:'Hududlar',totalFields:'Dalalar',totalStations:'Sensorlar',totalReadings:'O‘lchovlar',totalAlerts:'Ochiq ogohlantirishlar',latest:'So‘nggi o‘lchov',last:'Oxirgi yangilanish',flow:'Oqim (l/s)',time:'O‘lchov vaqti',source:'Manba',status:'Holat',region:'Hudud',name:'Nomi',crop:'Ekin',size:'Maydon (ga)',filter:'Qidirish...',reports:'CSV yuklab olish',manage:'Administrator',demo:'Demo boshqaruv panelini ko‘rish',input:'O‘lchov qo‘shish',station:'Sensor',level:'Suv sathi (sm)',save:'Saqlash',cancel:'Bekor qilish',empty:'Haqiqiy o‘lchovlar hali yo‘q. Tasodifiy sonlar ko‘rsatilmaydi.',helper:'Bu haqiqiy server ma’lumotlari. Sensor ulanmaguncha qiymat bo‘sh turadi.',operator:'Bu ma’lumotni faqat vakolatli irrigatsiya xodimi kiritishi mumkin.',farmer:'Fermer',irrigation:'Irrigatsiya',authority:'Hokimiyat',admin:'Administrator',success:'Ma’lumot bazaga saqlandi',dateInvalid:'Sana va miqdorni tekshiring',scope:'Faqat vakolatingizga tegishli ma’lumotlar ko‘rsatiladi.'},
@@ -43,38 +41,42 @@ export default function RealPilotCabinet(){
  async function saveReading(event:FormEvent<HTMLFormElement>){event.preventDefault();setBusy(true);setError('');setOk('');if(!stationId||!at||flow===''){setError(L.dateInvalid);setBusy(false);return}
  try{await apiRequest('/readings/',token,{method:'POST',body:JSON.stringify({station_id:Number(stationId),recorded_at:new Date(at).toISOString(),flow_lps:flow,...(level!==''?{level_cm:level}:{})})});setOk(L.success);setAdding(false);setFlow('');setLevel('');await refresh(token)}catch(err){setError(err instanceof Error?err.message:L.error)}finally{setBusy(false)}}
  const filtered=useMemo(()=>{if(!data)return [];const rows=data.readings;if(!query.trim())return rows;return rows.filter(r=>(r.station_code+' '+r.recorded_at+' '+r.flow_lps).toLowerCase().includes(query.toLowerCase()))},[data,query]);
- const role=user?.role||'farmer';const Icon=tokens[role];const available:(View)[]=role==='farmer'?['overview','fields','readings','alerts']:role==='authority'||role==='admin'?['overview','balance','devices','canals','fields','readings','alerts']:['overview','devices','canals','fields','readings','alerts'];
+ const role=user?.role||'farmer';const Icon=tokens[role];const available:(View)[]=role==='farmer'?['overview','fields','readings']:role==='authority'||role==='admin'?['overview','balance','devices','canals','fields','readings']:['overview','devices','canals','fields','readings'];
  const roleDesc=role==='farmer'?(lang==='uz'?'Dalalaringiz va o‘lchovlaringiz':lang==='ru'?'Ваши поля и измерения':'Your fields and readings'):role==='irrigation'?(lang==='uz'?'Biriktirilgan kanallar va o‘lchovlar':lang==='ru'?'Закреплённые каналы и измерения':'Assigned canals and measurements'):role==='authority'?(lang==='uz'?'Qorako‘l hududiy ko‘rsatkichlari':lang==='ru'?'Показатели Каракульского района':'Qorako‘l district overview'):L.manage;
  const kpis=data?[
  {icon:Waves,label:L.totalCanals,value:data.summary.counts.canals},
  {icon:MapPinned,label:role==='farmer'?L.totalFields:L.totalAreas,value:role==='farmer'?data.summary.counts.fields:data.summary.counts.areas},
  {icon:RadioTower,label:L.totalStations,value:data.summary.counts.stations},
- {icon:Bell,label:L.totalAlerts,value:data.summary.counts.open_alerts}
+ {icon:BarChart3,label:L.totalReadings,value:data.summary.counts.readings}
  ]:[];
  return <div className="ap-real-wrap">
  {authLoading?<div className="ap-real-auth"><Activity size={32}/><p>{L.loading}</p></div>:!token||!user||!data?
  <section className="ap-real-auth" aria-label={L.login}><div className="ap-real-auth-logo"><Droplets size={28}/><span>Agro<span>Pulse</span></span></div><span className="ap-real-pill"><LockKeyhole size={15}/> QORAKO‘L PILOT · REAL API</span><h1>{L.login}</h1><p>{L.real}</p><form onSubmit={signIn}><label>{L.user}<input name="username" autoComplete="username" required minLength={1}/></label><label>{L.password}<input type="password" name="password" autoComplete="current-password" required/></label><button className="ap-real-primary" type="submit" disabled={busy}>{busy?L.loading:L.submit}</button></form>{error&&<div className="ap-real-message error" role="alert">{error}</div>}<Link href="/">← {L.site}</Link><small>{L.helper}</small></section>
  :<div className="ap-real-app">
   <aside className="ap-real-sidebar"><div className="ap-real-auth-logo"><Droplets size={25}/><span>Agro<span>Pulse</span></span></div><span className="ap-real-pill"><ShieldCheck size={14}/> QORAKO‘L · REAL</span>
-    <nav aria-label="Dashboard">{available.map(id=>{const navIcons={overview:LayoutDashboard,canals:Waves,fields:Sprout,readings:BarChart3,alerts:Bell,balance:BookOpenCheck,devices:RadioTower};const Item=navIcons[id];return <button type="button" key={id} className={view===id?'selected':''} onClick={()=>setView(id)}><Item size={18}/>{L[id]}</button>})}</nav>
+    <nav aria-label="Dashboard">{available.map(id=>{const navIcons={overview:LayoutDashboard,canals:Waves,fields:Sprout,readings:BarChart3,balance:BookOpenCheck,devices:RadioTower};const Item=navIcons[id];return <button type="button" key={id} className={view===id?'selected':''} onClick={()=>setView(id)}><Item size={18}/>{L[id]}</button>})}</nav>
     <div className="ap-real-sidebar-bottom"><small>{L.scope}</small><Link href="/">← {L.site}</Link><button type="button" onClick={signOut}><LogOut size={17}/> {L.logout}</button></div>
   </aside>
   <div className="ap-real-main"><div className="ap-real-top"><div><span className="ap-real-kicker">AGROPULSE / QORAKO‘L / {L.real}</span><h1><Icon size={27}/>{L[role]}</h1><p>{roleDesc}</p></div><div className="ap-real-top-actions"><button type="button" onClick={reload} disabled={busy}><RefreshCcw size={17}/>{L.refresh}</button><span className="ap-real-user"><ShieldCheck size={16}/>{user.full_name}</span></div></div>
   {error&&<div className="ap-real-message error" role="alert">{error}</div>}{ok&&<div className="ap-real-message good" role="status">{ok}</div>}
   <div className="ap-real-status"><CheckCircle2 size={18}/>{L.helper}<span>{L.role}: {L[role]}</span></div>
   <div className="ap-real-mobile-nav">{available.map(id=><button className={view===id?'selected':''} key={id} onClick={()=>setView(id)}>{L[id]}</button>)}</div>
-  {view==='overview'&&<><PilotRoleInsights token={token} role={role} refreshKey={refreshKey}/><PilotDataQuality token={token} role={role} refreshKey={refreshKey}/><div className="ap-real-stats">{kpis.map(k=>{const K=k.icon;return <article key={k.label}><K size={23}/><small>{k.label}</small><strong>{k.value}</strong><span>{L.region}: {user.district?.name||'—'}</span></article>})}</div>
-  <div className="ap-real-two"><section className="ap-real-panel"><h2><Droplets size={21}/>{L.latest}</h2>{data.summary.latest_reading?<div className="ap-real-latest"><strong>{data.summary.latest_reading.flow_lps} <small>l/s</small></strong><div>{data.summary.latest_reading.station_code}</div><small>{dt(data.summary.latest_reading.recorded_at,lang)}</small></div>:<p className="ap-real-empty">{L.empty}</p>}<p className="ap-real-note">L/s — suv oqimi tezligi. Bu umumiy suv hajmi emas.</p></section>
-  <section className="ap-real-panel"><h2><Activity size={21}/>{L.summary}</h2><div className="ap-real-row"><span>{L.totalReadings}</span><b>{data.summary.counts.readings}</b></div><div className="ap-real-row"><span>{L.totalStations}</span><b>{data.summary.counts.enabled_stations}/{data.summary.counts.stations}</b></div><div className="ap-real-row"><span>{L.last}</span><b>{dt(data.summary.last_recorded_at,lang)}</b></div><button className="ap-real-plain" onClick={()=>setView('readings')}>{L.readings} →</button></section></div>
-  <section className="ap-real-panel"><div className="ap-real-panel-head"><h2><ClipboardList size={20}/>{L.readings}</h2><button onClick={exportCsv} disabled={busy}><Download size={16}/>{L.reports}</button></div><ReadingsTable list={data.readings.slice(0,8)} lang={lang} L={L}/></section></>}
-  {view==='balance'&&(role==='authority'||role==='admin')&&<PilotWaterBalance token={token} refreshKey={refreshKey}/> }
+  {view==='overview'&&<>
+  <CabinetPeriodAnalytics token={token} role={role}/>
+  <div className="ap-real-stats">{kpis.map(k=>{const K=k.icon;return <article key={k.label}><K size={23}/><small>{k.label}</small><strong>{k.value}</strong><span>{L.region}: {user.district?.name||'—'}</span></article>})}</div>
+  <section className="ap-real-panel ap-cabinet-note">
+    <h2><ShieldCheck size={20}/>{L.summary}</h2>
+    <p>{lang==='uz'?'Kabinetda faqat sizning vakolatingiz doirasidagi bazaga yozilgan haqiqiy ma’lumotlar ko‘rsatiladi. O‘lchov mavjud bo‘lmasa, raqam uydirilmaydi.':lang==='ru'?'Кабинет показывает только реальные записи базы в рамках ваших прав. При отсутствии измерений значения не придумываются.':'The cabinet shows only real database records within your permissions. Missing measurements are never fabricated.'}</p>
+  </section>
+ </>}
+ {view==='balance'&&(role==='authority'||role==='admin')&&<PilotWaterBalance token={token} refreshKey={refreshKey}/> }
   {view==='devices'&&role!=='farmer'&&<PilotDeviceMonitoring token={token} role={role} refreshKey={refreshKey}/>}
   {view==='canals'&&<section className="ap-real-panel"><h2><Waves size={21}/>{L.canals}</h2>{!data.canals.length?<p className="ap-real-empty">{L.noData}</p>:<div className="ap-real-simple-grid">{data.canals.map(c=><article key={c.id}><Waves size={20}/><strong>{c.name}</strong><small>{c.code}</small></article>)}</div>}</section>}
   {view==='fields'&&<section className="ap-real-panel"><h2><Sprout size={21}/>{L.fields}</h2>{!data.fields.length?<p className="ap-real-empty">{L.noData}</p>:<div className="ap-real-table-scroll"><table><thead><tr><th>{L.name}</th><th>{L.crop}</th><th>{L.size}</th></tr></thead><tbody>{data.fields.map(f=><tr key={f.id}><td>{f.name}</td><td>{f.crop||'—'}</td><td>{f.area_ha}</td></tr>)}</tbody></table></div>}</section>}
   {view==='readings'&&<section className="ap-real-panel"><div className="ap-real-panel-head"><h2><BarChart3 size={20}/>{L.readings}</h2><div className="ap-real-actions"><button onClick={exportCsv} disabled={busy}><Download size={16}/>{L.reports}</button>{role==='irrigation'||role==='admin'?<button className="ap-real-primary" onClick={()=>setAdding(x=>!x)}><Plus size={16}/>{L.input}</button>:null}</div></div>
    {adding&&<form className="ap-real-entry" onSubmit={saveReading}><label>{L.station}<select required value={stationId} onChange={e=>setStationId(e.target.value)}><option value="">—</option>{data.stations.filter(s=>s.is_enabled).map(s=><option key={s.id} value={s.id}>{s.name} ({s.code})</option>)}</select></label><label>{L.time}<input required type="datetime-local" value={at} onChange={e=>setAt(e.target.value)}/></label><label>{L.flow}<input required min="0" step="0.001" type="number" value={flow} onChange={e=>setFlow(e.target.value)}/></label><label>{L.level}<input min="0" step="0.01" type="number" value={level} onChange={e=>setLevel(e.target.value)}/></label><button className="ap-real-primary" disabled={busy}>{L.save}</button><button type="button" onClick={()=>setAdding(false)}>{L.cancel}</button></form>}
    <label className="ap-real-search"><Search size={17}/><input placeholder={L.filter} value={query} onChange={e=>setQuery(e.target.value)}/></label><ReadingsTable list={filtered} L={L} lang={lang}/></section>}
-  {view==='alerts'&&<PilotAlerts token={token} role={role} items={data.alerts} canals={data.canals} onChange={()=>refresh(token)}/> }
+  
   <div className="ap-real-footer"><ShieldCheck size={16}/> {L.scope}</div>
   </div>
  </div>}
