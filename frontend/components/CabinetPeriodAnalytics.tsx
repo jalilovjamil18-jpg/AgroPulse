@@ -3,7 +3,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import {Activity, CalendarDays, ChartNoAxesCombined, RadioTower, Waves} from 'lucide-react';
 import {useLanguage} from '@/components/LanguageProvider';
-import {apiRequest, type Role} from '@/lib/realApi';
+import {apiRequest} from '@/lib/realApi';
 
 type MonthRow = {
   month: string;
@@ -121,7 +121,7 @@ function formatNumber(value: number | string | null, lang: Lang, digits = 0) {
   }).format(numeric);
 }
 
-export default function CabinetPeriodAnalytics({token, role}: {token: string; role: Role}) {
+export default function CabinetPeriodAnalytics({token}: {token: string}) {
   const {language} = useLanguage();
   const lang: Lang = language === 'ru' || language === 'en' ? language : 'uz';
   const t = labels[lang];
@@ -176,7 +176,7 @@ export default function CabinetPeriodAnalytics({token, role}: {token: string; ro
           </label>
           {mode === 'month' && <label>{t.month}
             <select value={month} onChange={event => setMonth(event.target.value)}>
-              {monthNames[lang].map((name, index) => <option key={index + 1} value={index + 1}>{name}</option>)}
+              {monthNames[lang].map((name, index) => <option key={index + 1} value={index + 1} disabled={Number(year) === currentYear && index + 1 > new Date().getMonth() + 1}>{name}</option>)}
             </select>
           </label>}
           <button type="submit" className="ap-period-apply" disabled={busy}><CalendarDays size={15}/>{t.apply}</button>
