@@ -64,6 +64,7 @@ def period_statistics(request):
     cumulative water volume in m³.
     """
     year, month, period_type, first, next_month, start, stop = _requested_period(request)
+    today = timezone.localdate()
     user = request.user
     readings = authorized_readings(user).filter(
         recorded_at__gte=start,
