@@ -136,7 +136,7 @@ def annual_balance(request):
 
     through_month = timezone.localdate().month if year == current_year else 12
     start = date(year, 1, 1)
-    end = date(year, through_month, 1)
+    end = date(year, 12, 1)
     qs = (WaterBalance.objects.filter(
         area__district=district,
         month__gte=start,
@@ -165,16 +165,16 @@ def annual_balance(request):
         entry['documents'] += 1
         if item.planned_m3 is not None:
             entry['planned_values'].append(item.planned_m3)
-        if item.actual_m3 is not None:
+        if item.actual_m3 is not None and item.month.month <= through_month:
             entry['actual_values'].append(item.actual_m3)
-        if item.planned_m3 is not None and item.actual_m3 is not None:
+        if item.month.month <= through_month and item.planned_m3 is not None and item.actual_m3 is not None:
             entry['paired_plan'] += item.planned_m3
             entry['paired_actual'] += item.actual_m3
             entry['paired_months'] += 1
 
     area_count = Area.objects.filter(district=district).count()
     plan_values = [v for item in rows for v in [item.planned_m3] if v is not None]
-    actual_values = [v for item in rows for v in [item.actual_m3] if v is not None]
+    actual_values = [item.actual_m3 for item in rows if item.actual_m3 is not None and item.month.month <= through_month]
     paired_plan = sum((item.paired_plan for item in grouped.values()), Decimal('0'))
     paired_actual = sum((item.paired_actual for item in grouped.values()), Decimal('0'))
     annual_rows = []
@@ -192,7 +192,7 @@ def annual_balance(request):
             'document_count': item['documents'],
         })
 
-    expected_area_months = area_count * through_month
+    expected_area_months = area_count * 12
     verified_area_months = len(rows)
     return Response({
         'district': {'id': district.id, 'name': district.name},
@@ -212,14 +212,14 @@ def annual_balance(request):
         'planned_m3': formatted(sum(plan_values, Decimal('0'))) if plan_values else None,
         'actual_m3': formatted(sum(actual_values, Decimal('0'))) if actual_values else None,
         'areas_with_plan': len({item.area_id for item in rows if item.planned_m3 is not None}),
-        'areas_with_actual': len({item.area_id for item in rows if item.actual_m3 is not None}),
+        'areas_with_actual': len({item.area_id for item in rows if item.actual_m3 is not None and item.month.month <= through_month}),
         'paired_utilization_pct': ratio(paired_actual, paired_plan) if paired_plan else None,
         'rows': annual_rows,
         'missing_areas': list(Area.objects.filter(district=district).exclude(
             id__in=list(grouped.keys())).order_by('name').values('id', 'name')[:500]),
         'notice': (
             'Yillik m³ faqat administrator tasdiqlagan hujjatli oylik yozuvlar yig‘indisi. '
-            'Qamrov joriy yil uchun yil boshidan joriy oygacha hisoblanadi. '
-            'Qisman ma’lumotlar to‘liq yillik natija deb talqin qilinmasin; sensor l/s yozuvlaridan m³ olinmagan.'
+            'Reja butun yil bo‘yicha, amaldagi hajm joriy yil uchun faqat joriy oygacha jamlanadi. '
+            'Qamrov 12 oylik hudud-oy yozuvlari asosida; sensor l/s yozuvlaridan m³ olinmagan.'
         ),
     })
