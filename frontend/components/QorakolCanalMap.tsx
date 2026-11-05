@@ -44,7 +44,7 @@ function loadYandexMaps(key:string):Promise<YMaps3>{
   }
   script=document.createElement('script');
   script.dataset.agropulseYandex='true';
-  script.src=\`https://api-maps.yandex.ru/v3/?apikey=\${encodeURIComponent(key)}&lang=ru_RU\`;
+  script.src=`https://api-maps.yandex.ru/v3/?apikey=${encodeURIComponent(key)}&lang=ru_RU`;
   script.async=true;
   script.onload=()=>{script!.dataset.loaded='true';void finish()};
   script.onerror=()=>reject(new Error('Yandex API kaliti yoki internet aloqasini tekshiring.'));
