@@ -20,7 +20,7 @@ type YMaps3={
   registerCdn?:(template:string,packageName:string)=>void;
  };
 };
-declare global {interface Window {ymaps3?:YMaps3}}
+type WindowWithYandexMaps = Window & {ymaps3?:YMaps3};
 
 const CENTER:[number,number]=[63.85556,39.50278];
 
@@ -28,13 +28,13 @@ function loadYandexMaps(key:string):Promise<YMaps3>{
  return new Promise((resolve,reject)=>{
   const finish=async()=>{
    try{
-    const api=window.ymaps3;
+    const api=(window as WindowWithYandexMaps).ymaps3;
     if(!api)throw new Error('Yandex Maps API yuklanmadi.');
     await api.ready;
     resolve(api);
    }catch(error){reject(error)}
   };
-  if(window.ymaps3){void finish();return;}
+  if((window as WindowWithYandexMaps).ymaps3){void finish();return;}
   let script=document.querySelector<HTMLScriptElement>('script[data-agropulse-yandex]');
   if(script){
    script.addEventListener('load',()=>{script!.dataset.loaded='true';void finish()},{once:true});
